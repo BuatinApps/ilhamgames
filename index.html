@@ -14,7 +14,7 @@
             min-height: 100vh;
             margin: 0;
             background-color: #f4f4f4;
-            background-image: linear-gradient(to bottom, #6ab7ff, #fff); /* Gradient background */
+            background-image: linear-gradient(to bottom, #6ab7ff, #fff);
             color: #333;
         }
         h1 {
@@ -59,15 +59,51 @@
             text-align: right;
             font-size: 1.2rem;
         }
-        #input-jawaban {
-            padding: 0.75rem;
-            font-size: 1rem;
-            border: 1px solid #b0bec5;
-            border-radius: 0.5rem;
+        #area-jawaban {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             margin-bottom: 1rem;
             width: 100%;
-            text-align: right;
+        }
+        #tombol-angka {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            width: 100%;
+            max-width: 200px;
             box-sizing: border-box;
+        }
+        #tombol-angka button {
+            padding: 0.75rem;
+            font-size: 1rem;
+            background-color: #e0e0e0;
+            color: #333;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        #tombol-angka button:hover {
+            background-color: #ccc;
+        }
+        #tombol-hapus {
+            padding: 0.75rem;
+            font-size: 1rem;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            max-width: 200px;
+            box-sizing: border-box;
+            margin-top: 0.5rem;
+        }
+        #tombol-hapus:hover {
+            background-color: #d32f2f;
         }
         #tombol-jawab {
             padding: 0.75rem 1.5rem;
@@ -138,11 +174,9 @@
                 font-size: 1rem;
                 width: 95%;
             }
-            #input-jawaban {
+            #tombol-angka button, #tombol-hapus, #tombol-jawab {
                 font-size: 0.9rem;
-            }
-            #tombol-jawab {
-                font-size: 0.9rem;
+                padding: 0.5rem;
             }
             #area-umpan-balik {
                 font-size: 0.9rem;
@@ -158,6 +192,10 @@
             #game-over-content {
                 font-size: 1rem;
             }
+            #tombol-angka {
+                grid-template-columns: repeat(3, 1fr);
+                max-width: 100%;
+            }
         }
     </style>
 </head>
@@ -170,11 +208,23 @@
         <div id="baris-angka">
         </div>
         <hr style="width: 80px; margin-top: 0.5rem; margin-bottom: 0.5rem;">
-        <input type="number" id="input-jawaban" placeholder="Jawaban" min="0">
-    </div>
-
-    <div id="area-jawaban">
-        <button id="tombol-jawab" onclick="cekJawaban()">Jawab</button>
+        <div id="area-jawaban">
+            <div id="tombol-angka">
+                <button>1</button>
+                <button>2</button>
+                <button>3</button>
+                <button>4</button>
+                <button>5</button>
+                <button>6</button>
+                <button>7</button>
+                <button>8</button>
+                <button>9</button>
+                <button>0</button>
+            </div>
+            <button id="tombol-hapus">Hapus</button>
+            <button id="tombol-jawab" onclick="cekJawaban()">Jawab</button>
+            <div id="jawaban-teks"></div>
+        </div>
     </div>
 
     <div id="area-umpan-balik">
@@ -194,13 +244,15 @@
     <script>
         // Mendapatkan elemen-elemen yang dibutuhkan
         const barisAngka = document.getElementById('baris-angka');
-        const jawabanInput = document.getElementById('input-jawaban');
+        const tombolAngka = document.getElementById('tombol-angka');
+        const tombolHapus = document.getElementById('tombol-hapus');
+        const tombolJawab = document.getElementById('tombol-jawab');
         const umpanBalikArea = document.getElementById('area-umpan-balik');
         const skorDisplay = document.getElementById('skor');
-        const tombolJawab = document.getElementById('tombol-jawab');
         const timerDisplay = document.getElementById('timer');
         const gameOverOverlay = document.getElementById('game-over-overlay');
         const skorAkhirDisplay = document.getElementById('skor-akhir');
+        const jawabanTeks = document.getElementById('jawaban-teks');
 
         // Variabel-variabel game
         let skor = 0;
@@ -210,31 +262,48 @@
         let gameAktif = true;
         let waktuSisa = 300;
         let timerInterval;
+        let jawabanPemain = '';
 
         // Fungsi untuk menghasilkan soal penjumlahan susun
         function buatSoal() {
-            angka1 = Math.floor(Math.random() * 100) + 10; // Angka 2 digit
-            angka2 = Math.floor(Math.random() * 100) + 10; // Angka 2 digit
+            angka1 = Math.floor(Math.random() * 100) + 10;
+            angka2 = Math.floor(Math.random() * 100) + 10;
 
-            barisAngka.innerHTML = ''; // Bersihkan soal sebelumnya
+            barisAngka.innerHTML = '';
             const angka1String = angka1.toString().padStart(2, ' ');
             const angka2String = angka2.toString().padStart(2, ' ');
 
-            // Menampilkan angka dengan format susun
             barisAngka.innerHTML += `<div style="text-align: right;">${angka1String}</div>`;
             barisAngka.innerHTML += `<div style="text-align: right;">+${angka2String}</div>`;
 
             jawabanBenar = angka1 + angka2;
             umpanBalikArea.textContent = '';
-            jawabanInput.value = '';
+            jawabanPemain = '';
+            jawabanTeks.textContent = '';
         }
+
+        // Fungsi untuk menangani klik tombol angka
+        tombolAngka.addEventListener('click', function(event) {
+            if (event.target.tagName === 'BUTTON' && gameAktif) {
+                jawabanPemain += event.target.textContent;
+                jawabanTeks.textContent = jawabanPemain;
+            }
+        });
+
+        // Fungsi untuk menangani klik tombol hapus
+        tombolHapus.addEventListener('click', function() {
+            if (gameAktif) {
+                jawabanPemain = jawabanPemain.slice(0, -1);
+                jawabanTeks.textContent = jawabanPemain;
+            }
+        });
 
         // Fungsi untuk memeriksa jawaban
         function cekJawaban() {
             if (!gameAktif) return;
 
-            const jawabanPemain = parseInt(jawabanInput.value);
-            if (jawabanPemain === jawabanBenar) {
+            const jawabanPemainInt = parseInt(jawabanPemain);
+            if (jawabanPemainInt === jawabanBenar) {
                 umpanBalikArea.textContent = 'Benar!';
                 umpanBalikArea.style.color = 'green';
                 skor += 10;
@@ -266,9 +335,11 @@
         // Fungsi untuk menampilkan game over overlay
         function tampilkanGameOver() {
             barisAngka.style.display = 'none';
-            jawabanInput.style.display = 'none';
+            tombolAngka.style.display = 'none';
+            tombolHapus.style.display = 'none';
             tombolJawab.style.display = 'none';
             umpanBalikArea.style.display = 'none';
+            jawabanTeks.style.display = 'none';
             skorAkhirDisplay.textContent = skor;
             gameOverOverlay.style.display = 'flex';
         }
