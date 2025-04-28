@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Petualangan Matematika di Kamar Ajaib</title>
+    <title>Game Penjumlahan Susun</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        /* Gaya untuk canvas dan elemen-elemen lain */
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Press Start 2P', cursive;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -13,68 +14,90 @@
             min-height: 100vh;
             margin: 0;
             background-color: #f4f4f4;
+            background-image: linear-gradient(to bottom, #6ab7ff, #fff); /* Gradient background */
+            color: #333;
         }
-        #area-canvas {
-            background-color: #e0f7fa;
-            border: 2px solid #b0bec5;
-            border-radius: 8px;
-            box-shadow: 5px 5px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #fff;
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
         }
-        #area-pertanyaan {
-            font-size: 18px;
-            margin-bottom: 10px;
-            color: #555;
+        #timer-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2);
+            font-size: 1rem;
+            color: #333;
+            z-index: 10;
         }
-        #area-jawaban {
+        #area-soal {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 20px;
-
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 300px;
+            box-sizing: border-box;
+        }
+        #baris-angka {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+            width: 100%;
+            text-align: right;
+            font-size: 1.2rem;
         }
         #input-jawaban {
-            padding: 10px;
-            font-size: 16px;
+            padding: 0.75rem;
+            font-size: 1rem;
             border: 1px solid #b0bec5;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            width: 100px;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            width: 100%;
+            text-align: right;
+            box-sizing: border-box;
         }
         #tombol-jawab {
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
             background-color: #4caf50;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 0.5rem;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            width: 100%;
+            max-width: 200px;
+            box-sizing: border-box;
+            margin: 0.5rem 0;
         }
         #tombol-jawab:hover {
             background-color: #45a049;
         }
         #area-umpan-balik {
-            font-size: 18px;
+            font-size: 1rem;
             font-weight: bold;
-            margin-bottom: 10px;
-            min-height: 24px;
+            margin-bottom: 1rem;
+            min-height: 2rem;
+            text-align: center;
+            color: #333;
         }
         #area-skor {
-            font-size: 16px;
+            font-size: 1rem;
             color: #777;
-        }
-        #timer-container {
-            position: fixed; /* Fix the timer to the top */
-            top: 10px;
-            right: 10px;
-            background-color: #fff;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            font-size: 16px;
-            color: #333;
-            z-index: 10; /* Ensure timer is above other elements */
+            margin-bottom: 1rem;
         }
         #game-over-overlay {
             position: fixed;
@@ -82,37 +105,75 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.8);
-            display: none; /* Initially hidden */
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 11; /* Sit on top of everything */
+            z-index: 11;
             color: white;
-            font-size: 24px;
+            font-size: 1.2rem;
+            text-align: center;
         }
         #game-over-content {
-          border: 4px solid white;
-          border-radius: 10px;
-          padding: 20px;
-
+            border: 4px solid white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.9);
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.5);
         }
-
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+        p {
+            margin-bottom: 0.5rem;
+        }
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.2rem;
+            }
+            #area-soal {
+                font-size: 1rem;
+                width: 95%;
+            }
+            #input-jawaban {
+                font-size: 0.9rem;
+            }
+            #tombol-jawab {
+                font-size: 0.9rem;
+            }
+            #area-umpan-balik {
+                font-size: 0.9rem;
+            }
+            #area-skor {
+                font-size: 0.9rem;
+            }
+            #timer-container {
+                font-size: 0.9rem;
+                top: 0.5rem;
+                right: 0.5rem;
+            }
+            #game-over-content {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>Petualangan Matematika di Kamar Ajaib</h1>
+    <h1>Game Penjumlahan Susun</h1>
 
     <div id="timer-container">Waktu: <span id="timer">05:00</span></div>
 
-    <canvas id="area-canvas" width="400" height="300"></canvas>
-
-    <div id="area-pertanyaan">
-        <p>Berapa jumlah ... seluruhnya?</p>
+    <div id="area-soal">
+        <div id="baris-angka">
+        </div>
+        <hr style="width: 80px; margin-top: 0.5rem; margin-bottom: 0.5rem;">
+        <input type="number" id="input-jawaban" placeholder="Jawaban" min="0">
     </div>
 
     <div id="area-jawaban">
-        <input type="number" id="input-jawaban">
         <button id="tombol-jawab" onclick="cekJawaban()">Jawab</button>
     </div>
 
@@ -125,18 +186,14 @@
 
     <div id="game-over-overlay">
         <div id="game-over-content">
-          <h2>Waktu Habis!</h2>
-          <p>Skor Akhir Anda: <span id="skor-akhir">0</span></p>
+            <h2>Waktu Habis!</h2>
+            <p>Skor Akhir Anda: <span id="skor-akhir">0</span></p>
         </div>
     </div>
 
     <script>
-        // Mendapatkan elemen canvas dan konteksnya
-        const canvas = document.getElementById('area-canvas');
-        const ctx = canvas.getContext('2d');
-
-        // Mendapatkan elemen-elemen lain
-        const pertanyaanArea = document.getElementById('area-pertanyaan');
+        // Mendapatkan elemen-elemen yang dibutuhkan
+        const barisAngka = document.getElementById('baris-angka');
         const jawabanInput = document.getElementById('input-jawaban');
         const umpanBalikArea = document.getElementById('area-umpan-balik');
         const skorDisplay = document.getElementById('skor');
@@ -147,57 +204,29 @@
 
         // Variabel-variabel game
         let skor = 0;
-        let objek1 = { x: 50, y: 50, jumlah: 0, warna: 'blue', nama: 'bola' };
-        let objek2 = { x: 200, y: 100, jumlah: 0, warna: 'red', nama: 'kotak' };
+        let angka1 = 0;
+        let angka2 = 0;
         let jawabanBenar = 0;
         let gameAktif = true;
-        let waktuSisa = 300; // 5 menit dalam detik
+        let waktuSisa = 300;
         let timerInterval;
 
-        // Fungsi untuk menggambar objek di canvas
-        function gambarObjek(objek) {
-            ctx.fillStyle = objek.warna;
-            if (objek.nama === 'bola') {
-                ctx.beginPath();
-                ctx.arc(objek.x, objek.y, 20, 0, 2 * Math.PI);
-                ctx.fill();
-            } else if (objek.nama === 'kotak') {
-                ctx.fillRect(objek.x - 20, objek.y - 20, 40, 40);
-            }
-            // You can add more shapes or images as needed
-            ctx.fillStyle = 'black';
-            ctx.font = '16px Arial';
-            ctx.fillText(objek.jumlah, objek.x, objek.y);
-        }
-
-        // Fungsi untuk menghasilkan soal matematika
+        // Fungsi untuk menghasilkan soal penjumlahan susun
         function buatSoal() {
-            objek1.jumlah = Math.floor(Math.random() * 5) + 1;
-            objek2.jumlah = Math.floor(Math.random() * 5) + 1;
+            angka1 = Math.floor(Math.random() * 100) + 10; // Angka 2 digit
+            angka2 = Math.floor(Math.random() * 100) + 10; // Angka 2 digit
 
-            objek1.x = 50 + Math.random() * 100;
-            objek1.y = 50 + Math.random() * 100;
-            objek2.x = 200 + Math.random() * 100;
-            objek2.y = 100 + Math.random() * 100;
+            barisAngka.innerHTML = ''; // Bersihkan soal sebelumnya
+            const angka1String = angka1.toString().padStart(2, ' ');
+            const angka2String = angka2.toString().padStart(2, ' ');
 
-            let namaObjek1 = objek1.nama;
-            let namaObjek2 = objek2.nama;
+            // Menampilkan angka dengan format susun
+            barisAngka.innerHTML += `<div style="text-align: right;">${angka1String}</div>`;
+            barisAngka.innerHTML += `<div style="text-align: right;">+${angka2String}</div>`;
 
-            namaObjek1 = namaObjek1.charAt(0).toUpperCase() + namaObjek1.slice(1);
-            namaObjek2 = namaObjek2.charAt(0).toUpperCase() + namaObjek2.slice(1);
-
-            pertanyaanArea.textContent = `Berapa jumlah ${namaObjek1} dan ${namaObjek2} seluruhnya?`;
-            jawabanBenar = objek1.jumlah + objek2.jumlah;
+            jawabanBenar = angka1 + angka2;
             umpanBalikArea.textContent = '';
             jawabanInput.value = '';
-            gambarCanvas();
-        }
-
-        // Fungsi untuk menggambar di canvas
-        function gambarCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            gambarObjek(objek1);
-            gambarObjek(objek2);
         }
 
         // Fungsi untuk memeriksa jawaban
@@ -223,7 +252,7 @@
                 waktuSisa--;
                 const menit = Math.floor(waktuSisa / 60);
                 const detik = waktuSisa % 60;
-                const detikString = detik < 10 ? '0' + detik : detik; // Add leading zero if needed.
+                const detikString = detik < 10 ? '0' + detik : detik;
                 timerDisplay.textContent = `${menit}:${detikString}`;
 
                 if (waktuSisa <= 0) {
@@ -234,9 +263,9 @@
             }, 1000);
         }
 
+        // Fungsi untuk menampilkan game over overlay
         function tampilkanGameOver() {
-            canvas.style.display = 'none';
-            pertanyaanArea.style.display = 'none';
+            barisAngka.style.display = 'none';
             jawabanInput.style.display = 'none';
             tombolJawab.style.display = 'none';
             umpanBalikArea.style.display = 'none';
@@ -244,7 +273,7 @@
             gameOverOverlay.style.display = 'flex';
         }
 
-        // Start the game when the page loads
+        // Memulai permainan saat halaman dimuat
         buatSoal();
         startTimer();
     </script>
